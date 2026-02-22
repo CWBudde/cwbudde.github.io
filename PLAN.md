@@ -8,7 +8,7 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 
 ## Stack
 
-- **React 19 + Vite 6 + Bun** — build tooling
+- **React 19 + Vite + Bun** — build tooling
 - **TypeScript** — strict types throughout
 - **Tailwind CSS v4** — utility styling, dark theme
 - **shadcn/ui** — Card, Badge, Button components (copied into source)
@@ -25,7 +25,7 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 ┌─────────────────────────────────────────────────────┐
 │  Header: "CWBudde" · tagline · GitHub icon link     │
 ├─────────────────────────────────────────────────────┤
-│  ★ Featured  (repos with a homepage/demo URL set)   │
+│  ★ Featured  (repos listed in src/featured.ts)      │
 │  [Card] [Card] [Card]   ← larger cards, Live Demo   │
 ├─────────────────────────────────────────────────────┤
 │  All Repos  [Search ____] [Lang ▼] [Sort ▼]         │
@@ -36,7 +36,7 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 
 ### Data
 - Fetched live from `https://api.github.com/users/CWBudde/repos?per_page=100&sort=stars`
-- **Featured section** = repos that have a `homepage` URL set on GitHub (= web demos)
+- **Featured section** = repos listed by name in `src/featured.ts`
 - **All Repos section** = everything else, filterable by search / language / sort
 
 ### Repo card
@@ -50,35 +50,50 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 
 ## Tasks
 
-### Setup (sequential)
-- [ ] **Task 1** — Scaffold: `bun create vite . --template react-ts` + `bun install`
-- [ ] **Task 2** — Vite config: set `base: '/'`, add `@` path alias
-- [ ] **Task 3** — Tailwind CSS v4: `bun add -d tailwindcss @tailwindcss/vite`, dark body styles
-- [ ] **Task 4** — shadcn/ui: `bunx shadcn@latest init` (Zinc/Default/CSS vars) + add card, badge, button
+### Current status (as of 2026-02-22)
+- Completed: 13 / 15 tasks
+- Remaining: 2 / 15 tasks
+
+### Setup
+- [x] **Task 1** — Scaffold: `bun create vite . --template react-ts` + `bun install`
+- [x] **Task 2** — Vite config: set `base: '/'`, add `@` path alias
+- [x] **Task 3** — Tailwind CSS v4: `bun add -d tailwindcss @tailwindcss/vite`, dark body styles
+- [x] **Task 4** — shadcn/ui: init + add card, badge, button
 
 ### Core logic
-- [ ] **Task 5** — `src/types.ts` (Repo interface) + `src/lib/filter.ts` (filterRepos, sortRepos) + Vitest tests
-- [ ] **Task 6** — `src/hooks/useGitHubRepos.ts` — fetch with cancellation, loading/error state
+- [x] **Task 5** — `src/types.ts` + `src/featured.ts` + `src/lib/filter.ts` + Vitest tests
+- [x] **Task 6** — `src/hooks/useGitHubRepos.ts` with cancellation, loading/error state
 
 ### GitHub config
-- [ ] **Task 7** — Ensure repos with demos have `homepage` set on GitHub:
-  ```bash
-  gh repo edit CWBudde/<repo> --homepage "https://cwbudde.github.io/<repo>/"
-  ```
+- [ ] **Task 7** — Set `homepage` on repos with live demos (manual GitHub-side action)
 
-### Components (can be done in parallel)
-- [ ] **Task 8** — `src/components/RepoCard.tsx` — card with language badge, stars, optional Live Demo link
-- [ ] **Task 9** — `src/components/SkeletonCard.tsx` — animated loading placeholder
-- [ ] **Task 10** — `src/components/FeaturedSection.tsx` — spotlight grid with skeleton fallback
-- [ ] **Task 11** — `src/components/RepoGrid.tsx` — full grid with search, language filter, sort
-- [ ] **Task 12** — `src/components/Header.tsx` — name, tagline, GitHub icon link
+### Components
+- [x] **Task 8** — `src/components/RepoCard.tsx`
+- [x] **Task 9** — `src/components/SkeletonCard.tsx`
+- [x] **Task 10** — `src/components/FeaturedSection.tsx`
+- [x] **Task 11** — `src/components/RepoGrid.tsx`
+- [x] **Task 12** — `src/components/Header.tsx`
 
 ### Wiring
-- [ ] **Task 13** — `src/App.tsx` — wire useGitHubRepos → split featured/other → render sections
+- [x] **Task 13** — `src/App.tsx` wired to hook + featured split + sections
 
 ### Deployment
-- [ ] **Task 14** — `.github/workflows/deploy.yml` — bun install → test → build → deploy-pages
-- [ ] **Task 15** — Create `cwbudde.github.io` repo on GitHub, push, enable Pages (source: GitHub Actions)
+- [x] **Task 14** — `.github/workflows/deploy.yml` added (test → build → deploy-pages)
+- [ ] **Task 15** — Create/push/enable Pages for `cwbudde.github.io` (manual GitHub-side action)
+
+---
+
+## Recent Changes Noted (2026-02-22)
+
+- Featured logic now follows `src/featured.ts` (hardcoded featured repo names).
+- Added filtering/sorting utility + tests.
+- Added `useGitHubRepos` fetch hook with abort handling and retry path.
+- Added all planned page components and complete App wiring.
+- Added Vitest config in `vite.config.ts` and test scripts in `package.json`.
+- Added GitHub Pages deploy workflow.
+- Verified locally:
+  - `bun run test` passed (6 tests)
+  - `bun run build` passed
 
 ---
 
@@ -88,17 +103,22 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 cwbudde.github.io/
 ├── .github/workflows/deploy.yml
 ├── src/
-│   ├── types.ts                  # Repo interface (incl. homepage field)
+│   ├── types.ts
+│   ├── featured.ts
 │   ├── main.tsx
 │   ├── App.tsx
-│   ├── index.css                 # Tailwind + dark theme base
+│   ├── index.css
 │   ├── hooks/
 │   │   └── useGitHubRepos.ts
 │   ├── lib/
-│   │   ├── filter.ts             # filterRepos, sortRepos
-│   │   └── filter.test.ts        # Vitest tests
+│   │   ├── filter.ts
+│   │   ├── filter.test.ts
+│   │   └── utils.ts
 │   └── components/
-│       ├── ui/                   # shadcn copies (card, badge, button)
+│       ├── ui/
+│       │   ├── card.tsx
+│       │   ├── badge.tsx
+│       │   └── button.tsx
 │       ├── Header.tsx
 │       ├── RepoCard.tsx
 │       ├── SkeletonCard.tsx
@@ -112,25 +132,10 @@ cwbudde.github.io/
 
 ---
 
-## Deployment Notes
+## Remaining Manual Steps
 
-- Repo must be named exactly `cwbudde.github.io` (GitHub requirement for root Pages)
-- In repo Settings → Pages → Source: set to **GitHub Actions**
-- The `deploy.yml` workflow runs tests before every deploy — a failing test blocks deployment
-- `vite.config.ts` uses `base: '/'` (not a subpath like `/algo-dsp/`)
-- Featured section is automatic: just set the `homepage` field on any repo in GitHub Settings
-
----
-
-## Featured Repos (seed list — set homepage on each)
-
-These are good candidates to set a demo homepage on:
-
-| Repo | Suggested homepage |
-|------|--------------------|
-| algo-dsp | https://cwbudde.github.io/algo-dsp/ |
-| Pascal-HTML5-Canvas | https://cwbudde.github.io/Pascal-HTML5-Canvas/ |
-| Cards | https://cwbudde.github.io/Cards/ |
-| WebSofa | https://cwbudde.github.io/WebSofa/ |
-
-Any repo with a Pages deployment can be added — just set its homepage URL on GitHub.
+1. Set homepage URLs on demo repos, for example:
+   ```bash
+   gh repo edit CWBudde/<repo> --homepage "https://cwbudde.github.io/<repo>/"
+   ```
+2. Ensure the GitHub repo is `cwbudde.github.io`, push current branch, and enable Pages source as **GitHub Actions**.
