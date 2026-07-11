@@ -4,9 +4,10 @@ import { RepoGrid } from '@/components/RepoGrid'
 import { Button } from '@/components/ui/button'
 import { useGitHubRepos } from '@/hooks/useGitHubRepos'
 import { sortRepos } from '@/lib/filter'
+import { getLiveDemoUrl } from '@/lib/liveDemo'
 
-function isLiveDemoRepo(repo: { homepage: string | null; has_pages: boolean; fork: boolean }) {
-  return !repo.fork && (repo.has_pages || Boolean(repo.homepage && repo.homepage.trim()))
+function isLiveDemoRepo(repo: Parameters<typeof getLiveDemoUrl>[0]) {
+  return !repo.fork && getLiveDemoUrl(repo) !== null
 }
 
 export default function App() {
@@ -42,7 +43,7 @@ export default function App() {
 
         {!isLoading && repos.length > 0 ? (
           <p className="text-center text-xs text-zinc-500">
-            Live Demo links are shown for repositories with GitHub Pages enabled (or a homepage URL).
+            Live Demo links are shown for verified GitHub Pages deployments or configured homepage URLs.
           </p>
         ) : null}
       </main>
