@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { getLiveDemoUrl } from '@/lib/liveDemo'
-import { fetchReadmeSummary } from '@/lib/readmeSummary'
+import { fetchReadmeSummary, normalizeRepoDescription } from '@/lib/readmeSummary'
 import type { Repo } from '@/types'
 
 interface RepoCardProps {
@@ -39,22 +39,23 @@ function getLanguageClass(language: string | null): string {
 export function RepoCard({ repo, featured = false }: RepoCardProps) {
   const liveDemoUrl = getLiveDemoUrl(repo)
   const hasDemo = Boolean(liveDemoUrl)
+  const repoDescription = normalizeRepoDescription(repo.description)
   const [readmeFallback, setReadmeFallback] = useState({
     repoFullName: repo.full_name,
     summary: null as string | null,
-    isLoading: !repo.description,
+    isLoading: !repoDescription,
   })
 
   const currentReadmeFallback =
     readmeFallback.repoFullName === repo.full_name
       ? readmeFallback
-      : { repoFullName: repo.full_name, summary: null, isLoading: !repo.description }
-  const description = repo.description || currentReadmeFallback.summary
-  const usesReadmeFallback = !repo.description && Boolean(currentReadmeFallback.summary)
-  const isReadmeFallbackLoading = !repo.description && currentReadmeFallback.isLoading
+      : { repoFullName: repo.full_name, summary: null, isLoading: !repoDescription }
+  const description = repoDescription || currentReadmeFallback.summary
+  const usesReadmeFallback = !repoDescription && Boolean(currentReadmeFallback.summary)
+  const isReadmeFallbackLoading = !repoDescription && currentReadmeFallback.isLoading
 
   useEffect(() => {
-    if (repo.description && repo.description.trim().length > 0) {
+    if (repoDescription) {
       return
     }
 
@@ -77,7 +78,7 @@ export function RepoCard({ repo, featured = false }: RepoCardProps) {
       isActive = false
       controller.abort()
     }
-  }, [repo.description, repo.full_name])
+  }, [repo.full_name, repoDescription])
 
   return (
     <Card
