@@ -1,6 +1,3 @@
-const readmeSummaryCache = new Map<string, string | null>()
-const readmeSummaryInflight = new Map<string, Promise<string | null>>()
-
 export function normalizeRepoDescription(description: string | null): string | null {
   const normalized = description?.trim()
   return normalized ? normalized : null
@@ -93,43 +90,4 @@ export function extractReadmeFirstParagraph(markdown: string): string | null {
   }
 
   return paragraphLines.join(' ')
-}
-
-export async function fetchReadmeSummary(
-  fullName: string,
-  signal?: AbortSignal,
-): Promise<string | null> {
-  if (readmeSummaryCache.has(fullName)) {
-    return readmeSummaryCache.get(fullName) ?? null
-  }
-
-  if (readmeSummaryInflight.has(fullName)) {
-    return readmeSummaryInflight.get(fullName) ?? null
-  }
-
-  const request = fetch(`https://api.github.com/repos/${fullName}/readme`, {
-    signal,
-    headers: {
-      Accept: 'application/vnd.github.raw+json',
-    },
-  })
-    .then(async (response) => {
-      if (!response.ok) {
-        return null
-      }
-
-      const markdown = await response.text()
-      return extractReadmeFirstParagraph(markdown)
-    })
-    .catch(() => null)
-    .then((summary) => {
-      readmeSummaryCache.set(fullName, summary)
-      return summary
-    })
-    .finally(() => {
-      readmeSummaryInflight.delete(fullName)
-    })
-
-  readmeSummaryInflight.set(fullName, request)
-  return request
 }

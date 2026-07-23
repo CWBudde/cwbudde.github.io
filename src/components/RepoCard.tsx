@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { ArrowUpRight, Star } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
@@ -12,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { getLiveDemoUrl } from '@/lib/liveDemo'
-import { fetchReadmeSummary, normalizeRepoDescription } from '@/lib/readmeSummary'
+import { normalizeRepoDescription } from '@/lib/readmeSummary'
 import type { Repo } from '@/types'
 
 interface RepoCardProps {
@@ -40,45 +39,9 @@ export function RepoCard({ repo, featured = false }: RepoCardProps) {
   const liveDemoUrl = getLiveDemoUrl(repo)
   const hasDemo = Boolean(liveDemoUrl)
   const repoDescription = normalizeRepoDescription(repo.description)
-  const [readmeFallback, setReadmeFallback] = useState({
-    repoFullName: repo.full_name,
-    summary: null as string | null,
-    isLoading: !repoDescription,
-  })
-
-  const currentReadmeFallback =
-    readmeFallback.repoFullName === repo.full_name
-      ? readmeFallback
-      : { repoFullName: repo.full_name, summary: null, isLoading: !repoDescription }
-  const description = repoDescription || currentReadmeFallback.summary
-  const usesReadmeFallback = !repoDescription && Boolean(currentReadmeFallback.summary)
-  const isReadmeFallbackLoading = !repoDescription && currentReadmeFallback.isLoading
-
-  useEffect(() => {
-    if (repoDescription) {
-      return
-    }
-
-    const controller = new AbortController()
-    let isActive = true
-
-    void fetchReadmeSummary(repo.full_name, controller.signal).then((summary) => {
-      if (!isActive) {
-        return
-      }
-
-      setReadmeFallback({
-        repoFullName: repo.full_name,
-        summary: summary && summary.trim().length > 0 ? summary : null,
-        isLoading: false,
-      })
-    })
-
-    return () => {
-      isActive = false
-      controller.abort()
-    }
-  }, [repo.full_name, repoDescription])
+  const readmeFallback = normalizeRepoDescription(repo.readme_summary ?? null)
+  const description = repoDescription || readmeFallback
+  const usesReadmeFallback = !repoDescription && Boolean(readmeFallback)
 
   return (
     <Card
@@ -150,7 +113,7 @@ export function RepoCard({ repo, featured = false }: RepoCardProps) {
               <span className="line-clamp-2">{description}</span>
             )
           ) : (
-            (isReadmeFallbackLoading ? 'Loading README...' : 'No description provided.')
+            'No description provided.'
           )}
         </CardDescription>
       </CardHeader>

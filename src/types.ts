@@ -10,6 +10,7 @@ export interface Repo {
   has_pages: boolean
   updated_at: string
   fork: boolean
+  readme_summary?: string | null
 }
 
 export type SortOption =

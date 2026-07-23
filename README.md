@@ -56,6 +56,7 @@ anonymous rate limits.
 | --- | --- |
 | `bun run dev` | Start the Vite development server |
 | `bun run build` | Type-check and create a production build in `dist/` |
+| `bun run generate:data` | Refresh `public/repos.json` using `GITHUB_TOKEN` |
 | `bun run preview` | Preview the production build locally |
 | `bun run test` | Run the unit test suite once |
 | `bun run test:watch` | Run tests in watch mode |
@@ -63,20 +64,21 @@ anonymous rate limits.
 
 ## How It Works
 
-The `useGitHubRepos` hook requests up to 100 public repositories from the
-GitHub REST API. Successful responses are stored in `localStorage` for 24
-hours. Repositories with a configured homepage or a verified GitHub Pages
-deployment are treated as live demos; demos updated within the last six months
-appear in the featured section.
+GitHub Actions uses its authenticated token to generate `public/repos.json`
+during deployment. The browser loads this same-origin catalog instead of
+calling GitHub's rate-limited API directly, then stores successful responses in
+`localStorage` for 24 hours. Repositories with a configured homepage or a
+verified GitHub Pages deployment are treated as live demos; demos updated
+within the last six months appear in the featured section.
 
 GitHub's `has_pages` metadata can remain enabled for unavailable deployments.
 To avoid broken links, verified Pages repositories are maintained in
 `src/lib/liveDemo.ts`. The resolver also handles the root URL for the
 `cwbudde.github.io` repository.
 
-Repositories without a meaningful GitHub description trigger a second request
-for their README. The first useful paragraph is extracted and displayed as a
-fallback. Search, language filtering, and sorting all run in the browser.
+For repositories without a meaningful GitHub description, the catalog
+generator extracts the first useful README paragraph as a fallback. Search,
+language filtering, and sorting all run in the browser.
 
 ## Project Structure
 

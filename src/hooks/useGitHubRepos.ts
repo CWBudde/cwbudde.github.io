@@ -9,9 +9,8 @@ interface UseGitHubReposResult {
   refetch: () => void
 }
 
-const REPOS_URL =
-  'https://api.github.com/users/CWBudde/repos?per_page=100&sort=stars'
-const CACHE_KEY = 'cwbudde.repos.cache.v1'
+const REPOS_URL = `${import.meta.env.BASE_URL}repos.json`
+const CACHE_KEY = 'cwbudde.repos.cache.v2'
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 interface CachedReposPayload {
@@ -81,12 +80,12 @@ export function useGitHubRepos(): UseGitHubReposResult {
         const response = await fetch(REPOS_URL, {
           signal: controller.signal,
           headers: {
-            Accept: 'application/vnd.github+json',
+            Accept: 'application/json',
           },
         })
 
         if (!response.ok) {
-          throw new Error(`GitHub request failed (${response.status})`)
+          throw new Error(`Repository catalog request failed (${response.status})`)
         }
 
         const data = (await response.json()) as Repo[]
