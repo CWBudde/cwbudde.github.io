@@ -1,37 +1,116 @@
-# CWBudde projects
+# Christian-W. Budde's Portfolio
 
-The source for [cwbudde.github.io](https://cwbudde.github.io/), a searchable
-portfolio of CWBudde's public GitHub repositories and live demos.
+A responsive portfolio for exploring [CWBudde's public GitHub
+repositories](https://github.com/CWBudde). Repository data is loaded directly
+from the GitHub API, so project details stay current without requiring a
+separate backend.
 
-The site fetches repository metadata from GitHub's public API, highlights
-recent verified demos, and lets visitors filter the remaining repositories by
-name and language.
+**Live site:** [cwbudde.github.io](https://cwbudde.github.io)
 
-## Development
+## Features
 
-Requirements: [Bun](https://bun.sh/) and a current browser.
+- Highlights up to eight recently updated repositories with verified live demos
+- Searches repositories by name and description
+- Filters by programming language
+- Sorts by stars, update date, or name
+- Links directly to source repositories and available demos
+- Uses the first useful README paragraph when a repository has no description
+- Caches repository data in the browser for 24 hours to reduce GitHub API usage
+- Provides loading, empty, error, and retry states
+
+## Tech Stack
+
+- [React 19](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/) and [Bun](https://bun.sh/)
+- [Tailwind CSS 4](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/) components
+- [Lucide](https://lucide.dev/) icons
+- [Vitest](https://vitest.dev/)
+- [GitHub Actions](https://github.com/features/actions) and GitHub Pages
+
+## Local Development
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) installed
+
+### Setup
 
 ```bash
+git clone https://github.com/CWBudde/cwbudde.github.io.git
+cd cwbudde.github.io
 bun install
 bun run dev
 ```
 
-Useful checks:
+Vite prints the local development URL, typically
+[`http://localhost:5173`](http://localhost:5173).
+
+No environment variables or GitHub token are required. The application uses
+GitHub's public, unauthenticated API, so its requests are subject to GitHub's
+anonymous rate limits.
+
+## Available Commands
+
+| Command | Purpose |
+| --- | --- |
+| `bun run dev` | Start the Vite development server |
+| `bun run build` | Type-check and create a production build in `dist/` |
+| `bun run preview` | Preview the production build locally |
+| `bun run test` | Run the unit test suite once |
+| `bun run test:watch` | Run tests in watch mode |
+| `bun run lint` | Check the codebase with ESLint |
+
+## How It Works
+
+The `useGitHubRepos` hook requests up to 100 public repositories from the
+GitHub REST API. Successful responses are stored in `localStorage` for 24
+hours. Repositories with a configured homepage or a verified GitHub Pages
+deployment are treated as live demos; demos updated within the last six months
+appear in the featured section.
+
+GitHub's `has_pages` metadata can remain enabled for unavailable deployments.
+To avoid broken links, verified Pages repositories are maintained in
+`src/lib/liveDemo.ts`. The resolver also handles the root URL for the
+`cwbudde.github.io` repository.
+
+Repositories without a meaningful GitHub description trigger a second request
+for their README. The first useful paragraph is extracted and displayed as a
+fallback. Search, language filtering, and sorting all run in the browser.
+
+## Project Structure
+
+```text
+src/
+|-- components/          Page sections, repository cards, and UI primitives
+|-- hooks/               GitHub data fetching and browser cache
+|-- lib/                 Demo URLs, filtering, sorting, and README summaries
+|-- App.tsx              Page composition and featured-demo selection
+|-- index.css            Tailwind setup, theme tokens, and global styles
+`-- types.ts             Shared repository and sorting types
+```
+
+## Testing and Production Builds
+
+Before submitting changes, run:
 
 ```bash
-bun run test
 bun run lint
+bun run test
 bun run build
 ```
 
-## Live demo links
-
-An explicit GitHub repository homepage is used when one is available. GitHub
-Pages fallbacks are maintained in `src/lib/liveDemo.ts` and only included after
-their public URL has been verified. This avoids presenting a broken link when
-GitHub's `has_pages` metadata remains true after an unavailable deployment.
+Unit tests cover live-demo URL resolution, repository filtering and sorting,
+description normalization, and README summary extraction.
 
 ## Deployment
 
-Pushes to `main` run `.github/workflows/deploy.yml`, which tests and builds the
-site before publishing the `dist` artifact with GitHub Pages.
+Pushes to `main` trigger
+[the deployment workflow](.github/workflows/deploy.yml), which installs locked
+dependencies, runs the tests, configures GitHub Pages, builds the app, and
+publishes `dist/`. The workflow can also be started manually from the Actions
+tab.
+
+When a new Pages demo is deployed, verify its public URL and add the repository
+name to `VERIFIED_PAGES_REPOS` in `src/lib/liveDemo.ts`. Prefer an explicit
+repository homepage for custom or external demo URLs.
