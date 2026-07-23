@@ -1,73 +1,105 @@
-# React + TypeScript + Vite
+# Christian-W. Budde's Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A responsive portfolio for exploring [CWBudde's public GitHub
+repositories](https://github.com/CWBudde). Repository data is loaded directly
+from the GitHub API, so project details stay current without requiring a
+separate backend.
 
-Currently, two official plugins are available:
+**Live site:** [cwbudde.github.io](https://cwbudde.github.io)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- Highlights up to eight recently updated repositories with live demos
+- Searches repositories by name and description
+- Filters by programming language
+- Sorts by stars, update date, or name
+- Links directly to source repositories and available demos
+- Uses the first useful README paragraph when a repository has no description
+- Caches repository data in the browser for 24 hours to reduce GitHub API usage
+- Provides loading, empty, error, and retry states
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- [React 19](https://react.dev/) and [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vite.dev/) and [Bun](https://bun.sh/)
+- [Tailwind CSS 4](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/) components
+- [Lucide](https://lucide.dev/) icons
+- [Vitest](https://vitest.dev/)
+- [GitHub Actions](https://github.com/features/actions) and GitHub Pages
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Local Development
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- [Bun](https://bun.sh/) installed
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Setup
+
+```bash
+git clone https://github.com/MeKo-Christian/cwbudde.github.io.git
+cd cwbudde.github.io
+bun install
+bun run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Vite prints the local development URL, typically
+[`http://localhost:5173`](http://localhost:5173).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+No environment variables or GitHub token are required. The application uses
+GitHub's public, unauthenticated API, so its requests are subject to GitHub's
+anonymous rate limits.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Available Commands
+
+| Command | Purpose |
+| --- | --- |
+| `bun run dev` | Start the Vite development server |
+| `bun run build` | Type-check and create a production build in `dist/` |
+| `bun run preview` | Preview the production build locally |
+| `bun run test` | Run the unit test suite once |
+| `bun run test:watch` | Run tests in watch mode |
+| `bun run lint` | Check the codebase with ESLint |
+
+## How It Works
+
+The `useGitHubRepos` hook requests up to 100 public repositories from the
+GitHub REST API. Successful responses are stored in `localStorage` for 24
+hours. Repositories with GitHub Pages enabled or a homepage URL are treated as
+live demos; demos updated within the last six months appear in the featured
+section.
+
+Repositories without a GitHub description trigger a second request for their
+README. The first meaningful paragraph is extracted and displayed as a
+fallback. Search, language filtering, and sorting all run in the browser.
+
+## Project Structure
+
+```text
+src/
+|-- components/          Page sections, repository cards, and UI primitives
+|-- hooks/               GitHub data fetching and browser cache
+|-- lib/                 Filtering, sorting, and README summary utilities
+|-- App.tsx              Page composition and featured-demo selection
+|-- index.css            Tailwind setup, theme tokens, and global styles
+`-- types.ts             Shared repository and sorting types
 ```
+
+## Testing and Production Builds
+
+Before submitting changes, run:
+
+```bash
+bun run lint
+bun run test
+bun run build
+```
+
+Unit tests cover repository filtering, sorting, and README summary extraction.
+
+## Deployment
+
+Pushes to `main` trigger
+[the deployment workflow](.github/workflows/deploy.yml), which installs locked
+dependencies, runs the tests, builds the app, and publishes `dist/` to GitHub
+Pages. The workflow can also be started manually from the Actions tab.
