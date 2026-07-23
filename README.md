@@ -9,7 +9,7 @@ separate backend.
 
 ## Features
 
-- Highlights up to eight recently updated repositories with live demos
+- Highlights up to eight recently updated repositories with verified live demos
 - Searches repositories by name and description
 - Filters by programming language
 - Sorts by stars, update date, or name
@@ -37,7 +37,7 @@ separate backend.
 ### Setup
 
 ```bash
-git clone https://github.com/MeKo-Christian/cwbudde.github.io.git
+git clone https://github.com/CWBudde/cwbudde.github.io.git
 cd cwbudde.github.io
 bun install
 bun run dev
@@ -65,12 +65,17 @@ anonymous rate limits.
 
 The `useGitHubRepos` hook requests up to 100 public repositories from the
 GitHub REST API. Successful responses are stored in `localStorage` for 24
-hours. Repositories with GitHub Pages enabled or a homepage URL are treated as
-live demos; demos updated within the last six months appear in the featured
-section.
+hours. Repositories with a configured homepage or a verified GitHub Pages
+deployment are treated as live demos; demos updated within the last six months
+appear in the featured section.
 
-Repositories without a GitHub description trigger a second request for their
-README. The first meaningful paragraph is extracted and displayed as a
+GitHub's `has_pages` metadata can remain enabled for unavailable deployments.
+To avoid broken links, verified Pages repositories are maintained in
+`src/lib/liveDemo.ts`. The resolver also handles the root URL for the
+`cwbudde.github.io` repository.
+
+Repositories without a meaningful GitHub description trigger a second request
+for their README. The first useful paragraph is extracted and displayed as a
 fallback. Search, language filtering, and sorting all run in the browser.
 
 ## Project Structure
@@ -79,7 +84,7 @@ fallback. Search, language filtering, and sorting all run in the browser.
 src/
 |-- components/          Page sections, repository cards, and UI primitives
 |-- hooks/               GitHub data fetching and browser cache
-|-- lib/                 Filtering, sorting, and README summary utilities
+|-- lib/                 Demo URLs, filtering, sorting, and README summaries
 |-- App.tsx              Page composition and featured-demo selection
 |-- index.css            Tailwind setup, theme tokens, and global styles
 `-- types.ts             Shared repository and sorting types
@@ -95,11 +100,17 @@ bun run test
 bun run build
 ```
 
-Unit tests cover repository filtering, sorting, and README summary extraction.
+Unit tests cover live-demo URL resolution, repository filtering and sorting,
+description normalization, and README summary extraction.
 
 ## Deployment
 
 Pushes to `main` trigger
 [the deployment workflow](.github/workflows/deploy.yml), which installs locked
-dependencies, runs the tests, builds the app, and publishes `dist/` to GitHub
-Pages. The workflow can also be started manually from the Actions tab.
+dependencies, runs the tests, configures GitHub Pages, builds the app, and
+publishes `dist/`. The workflow can also be started manually from the Actions
+tab.
+
+When a new Pages demo is deployed, verify its public URL and add the repository
+name to `VERIFIED_PAGES_REPOS` in `src/lib/liveDemo.ts`. Prefer an explicit
+repository homepage for custom or external demo URLs.

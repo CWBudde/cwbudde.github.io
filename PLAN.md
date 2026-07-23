@@ -50,9 +50,9 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 
 ## Tasks
 
-### Current status (as of 2026-02-22)
-- Completed: 13 / 15 tasks
-- Remaining: 2 / 15 tasks
+### Current status (as of 2026-07-11)
+- Completed: 15 / 15 tasks
+- Remaining: 0 / 15 tasks
 
 ### Setup
 - [x] **Task 1** — Scaffold: `bun create vite . --template react-ts` + `bun install`
@@ -65,7 +65,10 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 - [x] **Task 6** — `src/hooks/useGitHubRepos.ts` with cancellation, loading/error state
 
 ### GitHub config
-- [ ] **Task 7** — Set `homepage` on repos with live demos (manual GitHub-side action)
+- [x] **Task 7** — Provide verified homepage URLs for repositories with live demos
+  - Explicit repository homepages remain authoritative.
+  - Verified GitHub Pages fallbacks live in `src/lib/liveDemo.ts`.
+  - Repositories whose Pages metadata is stale do not get broken demo links.
 
 ### Components
 - [x] **Task 8** — `src/components/RepoCard.tsx`
@@ -79,7 +82,8 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 
 ### Deployment
 - [x] **Task 14** — `.github/workflows/deploy.yml` added (test → build → deploy-pages)
-- [ ] **Task 15** — Create/push/enable Pages for `cwbudde.github.io` (manual GitHub-side action)
+- [x] **Task 15** — Create/push/enable Pages for `cwbudde.github.io`
+  - Verified live at `https://cwbudde.github.io/` on 2026-07-11.
 
 ---
 
@@ -94,6 +98,15 @@ Detailed step-by-step plan: `docs/plans/2026-02-21-portfolio-site.md`
 - Verified locally:
   - `bun run test` passed (6 tests)
   - `bun run build` passed
+
+## Completion Update (2026-07-11)
+
+- Verified all non-fork repositories advertising GitHub Pages.
+- Added a tested live-demo URL resolver, including the special root URL for
+  `cwbudde.github.io`.
+- Excluded stale Pages metadata that currently resolves to a 404.
+- Added the standard `actions/configure-pages` deployment step.
+- Replaced the Vite scaffold README and page title with project-specific copy.
 
 ---
 
@@ -132,10 +145,8 @@ cwbudde.github.io/
 
 ---
 
-## Remaining Manual Steps
+## Maintenance
 
-1. Set homepage URLs on demo repos, for example:
-   ```bash
-   gh repo edit CWBudde/<repo> --homepage "https://cwbudde.github.io/<repo>/"
-   ```
-2. Ensure the GitHub repo is `cwbudde.github.io`, push current branch, and enable Pages source as **GitHub Actions**.
+When a new demo is deployed, verify its public URL and add the repository name
+to `VERIFIED_PAGES_REPOS` in `src/lib/liveDemo.ts`. Prefer setting an explicit
+repository homepage when the demo uses a custom or external URL.

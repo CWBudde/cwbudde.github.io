@@ -1,6 +1,11 @@
 const readmeSummaryCache = new Map<string, string | null>()
 const readmeSummaryInflight = new Map<string, Promise<string | null>>()
 
+export function normalizeRepoDescription(description: string | null): string | null {
+  const normalized = description?.trim()
+  return normalized ? normalized : null
+}
+
 function isSkippableBadgeLine(line: string): boolean {
   return /^!?\[.*\]\(.*\)$/.test(line.trim()) || /^\[!\[.*\]\(.*\)\]\(.*\)$/.test(line.trim())
 }

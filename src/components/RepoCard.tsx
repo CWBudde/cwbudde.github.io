@@ -11,24 +11,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { fetchReadmeSummary } from '@/lib/readmeSummary'
+import { getLiveDemoUrl } from '@/lib/liveDemo'
+import { fetchReadmeSummary, normalizeRepoDescription } from '@/lib/readmeSummary'
 import type { Repo } from '@/types'
 
 interface RepoCardProps {
   repo: Repo
   featured?: boolean
-}
-
-function getLiveDemoUrl(repo: Repo): string | null {
-  if (repo.homepage && repo.homepage.trim().length > 0) {
-    return repo.homepage
-  }
-
-  if (repo.has_pages) {
-    return `https://cwbudde.github.io/${repo.name}/`
-  }
-
-  return null
 }
 
 const languageColor: Record<string, string> = {
@@ -50,40 +39,46 @@ function getLanguageClass(language: string | null): string {
 export function RepoCard({ repo, featured = false }: RepoCardProps) {
   const liveDemoUrl = getLiveDemoUrl(repo)
   const hasDemo = Boolean(liveDemoUrl)
-  const [description, setDescription] = useState(repo.description)
-  const [usesReadmeFallback, setUsesReadmeFallback] = useState(false)
-  const [isReadmeFallbackLoading, setIsReadmeFallbackLoading] = useState(false)
+  const repoDescription = normalizeRepoDescription(repo.description)
+  const [readmeFallback, setReadmeFallback] = useState({
+    repoFullName: repo.full_name,
+    summary: null as string | null,
+    isLoading: !repoDescription,
+  })
+
+  const currentReadmeFallback =
+    readmeFallback.repoFullName === repo.full_name
+      ? readmeFallback
+      : { repoFullName: repo.full_name, summary: null, isLoading: !repoDescription }
+  const description = repoDescription || currentReadmeFallback.summary
+  const usesReadmeFallback = !repoDescription && Boolean(currentReadmeFallback.summary)
+  const isReadmeFallbackLoading = !repoDescription && currentReadmeFallback.isLoading
 
   useEffect(() => {
-    setDescription(repo.description)
-    setUsesReadmeFallback(false)
-    setIsReadmeFallbackLoading(false)
-
-    if (repo.description && repo.description.trim().length > 0) {
+    if (repoDescription) {
       return
     }
 
     const controller = new AbortController()
     let isActive = true
-    setIsReadmeFallbackLoading(true)
 
     void fetchReadmeSummary(repo.full_name, controller.signal).then((summary) => {
       if (!isActive) {
         return
       }
 
-      if (summary && summary.trim().length > 0) {
-        setDescription(summary)
-        setUsesReadmeFallback(true)
-      }
-      setIsReadmeFallbackLoading(false)
+      setReadmeFallback({
+        repoFullName: repo.full_name,
+        summary: summary && summary.trim().length > 0 ? summary : null,
+        isLoading: false,
+      })
     })
 
     return () => {
       isActive = false
       controller.abort()
     }
-  }, [repo.description, repo.full_name])
+  }, [repo.full_name, repoDescription])
 
   return (
     <Card

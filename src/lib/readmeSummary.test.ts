@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest'
 
-import { extractReadmeFirstParagraph } from '@/lib/readmeSummary'
+import { extractReadmeFirstParagraph, normalizeRepoDescription } from '@/lib/readmeSummary'
+
+describe('normalizeRepoDescription', () => {
+  it('trims meaningful descriptions', () => {
+    expect(normalizeRepoDescription('  A useful library.  ')).toBe('A useful library.')
+  })
+
+  it('treats empty and whitespace-only descriptions as missing', () => {
+    expect(normalizeRepoDescription('   \n\t')).toBeNull()
+    expect(normalizeRepoDescription(null)).toBeNull()
+  })
+})
 
 describe('extractReadmeFirstParagraph', () => {
   it('skips top-level heading and returns the first paragraph', () => {
