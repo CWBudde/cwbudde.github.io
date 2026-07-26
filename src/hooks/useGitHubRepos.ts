@@ -10,12 +10,25 @@ interface UseGitHubReposResult {
 }
 
 const REPOS_URL = `${import.meta.env.BASE_URL}repos.json`
-const CACHE_KEY = 'cwbudde.repos.cache.v2'
+// Bump when the catalog shape changes, so returning visitors are not stuck on a
+// stale payload for the full TTL. v3 added created_at.
+const CACHE_KEY = 'cwbudde.repos.cache.v3'
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 interface CachedReposPayload {
   repos: Repo[]
   fetchedAt: number
+}
+
+/** Drops payloads written under earlier cache keys so they do not linger forever. */
+function pruneStaleCaches() {
+  try {
+    Object.keys(localStorage)
+      .filter((key) => key.startsWith('cwbudde.repos.cache.') && key !== CACHE_KEY)
+      .forEach((key) => localStorage.removeItem(key))
+  } catch {
+    // Ignore storage failures.
+  }
 }
 
 function readCachedRepos(): CachedReposPayload | null {
@@ -52,6 +65,7 @@ export function useGitHubRepos(): UseGitHubReposResult {
 
   useEffect(() => {
     const controller = new AbortController()
+    pruneStaleCaches()
     const cached = readCachedRepos()
     const isForceRefresh = refreshToken > 0
 

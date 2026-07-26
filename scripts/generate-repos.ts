@@ -82,6 +82,7 @@ async function buildCatalog(repos: Repo[]) {
         stargazers_count: repo.stargazers_count,
         homepage: repo.homepage,
         has_pages: repo.has_pages,
+        created_at: repo.created_at,
         updated_at: repo.updated_at,
         fork: repo.fork,
         readme_summary: description

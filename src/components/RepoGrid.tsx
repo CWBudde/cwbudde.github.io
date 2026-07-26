@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 
 import { RepoCard } from '@/components/RepoCard'
 import { SkeletonCard } from '@/components/SkeletonCard'
+import { useTranslation } from '@/i18n/useTranslation'
 import { filterRepos, sortRepos } from '@/lib/filter'
 import type { Repo, SortOption } from '@/types'
 
@@ -10,16 +11,20 @@ interface RepoGridProps {
   isLoading: boolean
 }
 
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: 'stars-desc', label: 'Most Stars' },
-  { value: 'updated-desc', label: 'Recently Updated' },
-  { value: 'name-asc', label: 'Name (A-Z)' },
-  { value: 'name-desc', label: 'Name (Z-A)' },
-  { value: 'stars-asc', label: 'Fewest Stars' },
-  { value: 'updated-asc', label: 'Oldest Updated' },
+const SORT_ORDER: SortOption[] = [
+  'stars-desc',
+  'updated-desc',
+  'name-asc',
+  'name-desc',
+  'stars-asc',
+  'updated-asc',
 ]
 
+const controlClass =
+  'h-10 rounded-md border border-input bg-card px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+
 export function RepoGrid({ repos, isLoading }: RepoGridProps) {
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [language, setLanguage] = useState('all')
   const [sort, setSort] = useState<SortOption>('stars-desc')
@@ -44,26 +49,30 @@ export function RepoGrid({ repos, isLoading }: RepoGridProps) {
     <section className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-zinc-400">Repository Index</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-zinc-100">All repositories</h2>
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
+            {t.grid.eyebrow}
+          </p>
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">{t.grid.title}</h2>
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search repos"
-            className="h-10 rounded-md border border-zinc-700 bg-zinc-950/80 px-3 text-sm text-zinc-100 outline-none ring-0 placeholder:text-zinc-500 focus:border-emerald-400"
+            placeholder={t.grid.searchPlaceholder}
+            aria-label={t.grid.searchLabel}
+            className={controlClass}
           />
 
           <select
             value={language}
             onChange={(event) => setLanguage(event.target.value)}
-            className="h-10 rounded-md border border-zinc-700 bg-zinc-950/80 px-3 text-sm text-zinc-100 outline-none focus:border-emerald-400"
+            aria-label={t.grid.languageLabel}
+            className={controlClass}
           >
             {languages.map((entry) => (
               <option key={entry} value={entry}>
-                {entry === 'all' ? 'All Languages' : entry}
+                {entry === 'all' ? t.grid.allLanguages : entry}
               </option>
             ))}
           </select>
@@ -71,11 +80,12 @@ export function RepoGrid({ repos, isLoading }: RepoGridProps) {
           <select
             value={sort}
             onChange={(event) => setSort(event.target.value as SortOption)}
-            className="h-10 rounded-md border border-zinc-700 bg-zinc-950/80 px-3 text-sm text-zinc-100 outline-none focus:border-emerald-400"
+            aria-label={t.grid.sortLabel}
+            className={controlClass}
           >
-            {sortOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {SORT_ORDER.map((option) => (
+              <option key={option} value={option}>
+                {t.grid.sort[option]}
               </option>
             ))}
           </select>
@@ -89,8 +99,8 @@ export function RepoGrid({ repos, isLoading }: RepoGridProps) {
           ))}
         </div>
       ) : visibleRepos.length === 0 ? (
-        <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 p-6 text-sm text-zinc-400">
-          No repositories match the current filters.
+        <div className="rounded-xl border border-border bg-card p-6 text-sm text-muted-foreground">
+          {t.grid.empty}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

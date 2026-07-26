@@ -1,7 +1,10 @@
+import { ActivityChart } from '@/components/ActivityChart'
 import { FeaturedSection } from '@/components/FeaturedSection'
 import { Header } from '@/components/Header'
 import { RepoGrid } from '@/components/RepoGrid'
+import { StatsBar } from '@/components/StatsBar'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from '@/i18n/useTranslation'
 import { useGitHubRepos } from '@/hooks/useGitHubRepos'
 import { sortRepos } from '@/lib/filter'
 import { getLiveDemoUrl } from '@/lib/liveDemo'
@@ -12,39 +15,44 @@ function isLiveDemoRepo(repo: Parameters<typeof getLiveDemoUrl>[0]) {
 
 export default function App() {
   const { repos, isLoading, error, refetch } = useGitHubRepos()
+  const { t } = useTranslation()
 
   const sixMonthsAgo = new Date()
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
   const recentLiveDemoRepos = sortRepos(
     repos.filter(
-      (repo) => isLiveDemoRepo(repo) && new Date(repo.updated_at).getTime() >= sixMonthsAgo.getTime(),
+      (repo) =>
+        isLiveDemoRepo(repo) && new Date(repo.updated_at).getTime() >= sixMonthsAgo.getTime(),
     ),
     'updated-desc',
   ).slice(0, 8)
   const regularRepos = repos.filter((repo) => !isLiveDemoRepo(repo))
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.15),transparent_35%),radial-gradient(circle_at_bottom_left,_rgba(14,116,144,0.18),transparent_35%),#09090b] px-4 py-8 text-zinc-100 md:px-6 md:py-10">
+    <div className="min-h-screen bg-background px-4 py-8 text-foreground md:px-6 md:py-10">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <Header />
 
         {error ? (
-          <section className="rounded-xl border border-red-800/60 bg-red-950/40 p-5">
-            <p className="text-sm text-red-200">{error}</p>
-            <Button onClick={refetch} className="mt-3 bg-red-300 text-red-950 hover:bg-red-200">
-              Retry Fetch
+          <section className="rounded-xl border border-destructive/40 bg-destructive/10 p-5">
+            <p className="text-sm text-destructive">{error}</p>
+            <Button onClick={refetch} variant="destructive" className="mt-3">
+              {t.errors.retry}
             </Button>
           </section>
         ) : null}
 
+        <StatsBar repos={repos} isLoading={isLoading} />
+
         <FeaturedSection repos={recentLiveDemoRepos} isLoading={isLoading} />
+
+        <ActivityChart repos={repos} isLoading={isLoading} />
+
         <RepoGrid repos={regularRepos} isLoading={isLoading} />
 
         {!isLoading && repos.length > 0 ? (
-          <p className="text-center text-xs text-zinc-500">
-            Live Demo links are shown for verified GitHub Pages deployments or configured homepage URLs.
-          </p>
+          <p className="text-center text-xs text-muted-foreground">{t.footer.note}</p>
         ) : null}
       </main>
     </div>

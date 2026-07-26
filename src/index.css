@@ -5,17 +5,73 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Light is the default palette; `.dark` on <html> swaps it. The theme provider
+ * resolves "system" to one of the two and toggles that class, so the CSS never
+ * needs its own prefers-color-scheme query and the `dark:` variant always
+ * agrees with what is on screen.
+ */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   --radius: 0.625rem;
+
+  --background: oklch(0.985 0.002 250);
+  --foreground: oklch(0.21 0.012 260);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.012 260);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.012 260);
+  --primary: oklch(0.6 0.128 165);
+  --primary-foreground: oklch(0.99 0.01 160);
+  --secondary: oklch(0.955 0.004 260);
+  --secondary-foreground: oklch(0.28 0.012 260);
+  --muted: oklch(0.955 0.004 260);
+  --muted-foreground: oklch(0.52 0.014 260);
+  --accent: oklch(0.955 0.004 260);
+  --accent-foreground: oklch(0.28 0.012 260);
+  --destructive: oklch(0.58 0.21 25);
+  --border: oklch(0.9 0.005 260);
+  --input: oklch(0.88 0.006 260);
+  --ring: oklch(0.6 0.128 165);
+
+  /* Brand + data-visualisation tokens, read by the activity chart canvas. */
+  --brand: oklch(0.58 0.13 165);
+  --brand-soft: oklch(0.58 0.13 165 / 12%);
+  --chart-trace: oklch(0.62 0.13 165);
+  --chart-trace-muted: oklch(0.62 0.13 165 / 32%);
+  --chart-cursor: oklch(0.52 0.14 240);
+  --chart-grid: oklch(0.87 0.006 260);
+  --chart-axis: oklch(0.62 0.014 260);
+
+  --page-glow-a: oklch(0.6 0.128 165 / 10%);
+  --page-glow-b: oklch(0.58 0.1 220 / 10%);
+
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.21 0.012 260);
+  --sidebar-primary: oklch(0.6 0.128 165);
+  --sidebar-primary-foreground: oklch(0.99 0.01 160);
+  --sidebar-accent: oklch(0.955 0.004 260);
+  --sidebar-accent-foreground: oklch(0.28 0.012 260);
+  --sidebar-border: oklch(0.9 0.005 260);
+  --sidebar-ring: oklch(0.6 0.128 165);
+}
+
+.dark {
+  color-scheme: dark;
+
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.76 0.145 163);
+  --primary-foreground: oklch(0.19 0.03 165);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
@@ -23,9 +79,21 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.76 0.145 163);
+
+  --brand: oklch(0.79 0.16 163);
+  --brand-soft: oklch(0.79 0.16 163 / 15%);
+  --chart-trace: oklch(0.79 0.15 75);
+  --chart-trace-muted: oklch(0.79 0.15 75 / 34%);
+  --chart-cursor: oklch(0.82 0.11 195);
+  --chart-grid: oklch(1 0 0 / 12%);
+  --chart-axis: oklch(0.65 0.02 220);
+
+  --page-glow-a: oklch(0.79 0.16 163 / 15%);
+  --page-glow-b: oklch(0.7 0.12 220 / 18%);
+
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -67,6 +135,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-chart-trace: var(--chart-trace);
+  --color-chart-cursor: var(--chart-cursor);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-axis: var(--chart-axis);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -95,5 +169,16 @@
   code,
   pre {
     font-family: 'IBM Plex Mono', monospace;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

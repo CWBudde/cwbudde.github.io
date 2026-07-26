@@ -1,28 +1,52 @@
 import { Github } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { useTranslation } from '@/i18n/useTranslation'
 
 export function Header() {
-  return (
-    <header className="relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950/70 p-6 md:p-8">
-      <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-emerald-500/15 blur-3xl" />
-      <div className="pointer-events-none absolute -left-20 bottom-0 h-36 w-36 rounded-full bg-cyan-500/15 blur-3xl" />
+  const { t } = useTranslation()
 
-      <div className="relative z-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-300/80">Portfolio</p>
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-50 md:text-5xl">Christian-W. Budde</h1>
-          <p className="mt-2 max-w-xl text-sm text-zinc-300 md:text-base">
-            Public projects, experiments, and deployable demos from GitHub.
-          </p>
+  return (
+    <header className="relative overflow-hidden rounded-2xl border border-border bg-card/70 p-6 md:p-8">
+      <div
+        className="pointer-events-none absolute -right-12 -top-16 size-48 rounded-full bg-[var(--page-glow-a)] blur-3xl"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute -left-20 bottom-0 size-36 rounded-full bg-[var(--page-glow-b)] blur-3xl"
+        aria-hidden="true"
+      />
+
+      <div className="relative z-10 flex flex-col gap-5">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <LanguageSwitcher />
+          <ThemeToggle />
         </div>
 
-        <Button asChild variant="outline" className="w-fit border-zinc-700 bg-zinc-900/70 text-zinc-100 hover:bg-zinc-800">
-          <a href="https://github.com/CWBudde" target="_blank" rel="noreferrer">
-            <Github className="size-4" />
-            GitHub Profile
+        <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.35em] text-brand">
+              {t.header.eyebrow}
+            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl">
+              Christian-W. Budde
+            </h1>
+            <p className="mt-2 max-w-xl text-sm text-muted-foreground md:text-base">
+              {t.header.tagline}
+            </p>
+          </div>
+
+          <a
+            href="https://github.com/CWBudde"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex w-fit items-center gap-2 rounded-md border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            <Github className="size-4" aria-hidden="true" />
+            {t.header.githubProfile}
           </a>
-        </Button>
+        </div>
       </div>
     </header>
   )
