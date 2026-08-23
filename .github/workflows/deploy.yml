@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Weekly on Monday 05:00 UTC, to refresh the generated repository catalog
+    - cron: '0 5 * * 1'
   workflow_dispatch:
 
 permissions:
